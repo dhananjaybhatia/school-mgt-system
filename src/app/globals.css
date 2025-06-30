@@ -31,3 +31,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.react-calendar {
+  width: 100% !important;
+  border: none !important;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.react-calendar__tile--active {
+  color: black !important;
+  background-color: #a9def9 !important;
+}
+
+.react-calendar__navigation__label__labelText {
+  font-weight: 600 !important;
+}
