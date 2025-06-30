@@ -93,20 +93,6 @@ const AttendenceChart = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
-      {/* BOTOTOM */}
-      {/* <div className="flex justify-center gap-16 ">
-        <div className="flex flex-col gap-1 items-center leading-5 ">
-          <div className="w-5 h-5 rounded-full  bg-blue" />
-          <h1 className="font-bold">1,234</h1>
-          <h2 className="text-gray-300 text-xs">Boys (55%)</h2>
-        </div>
-        <div className="flex flex-col gap-1 items-center leading-5">
-          <div className="w-5 h-5 rounded-full bg-[#FFCCE1]" />
-          <h1 className="font-bold">1,234</h1>
-          <h2 className="text-gray-300 text-xs">Girls (45%)</h2>
-        </div>
-      </div> */}
     </div>
   );
 };

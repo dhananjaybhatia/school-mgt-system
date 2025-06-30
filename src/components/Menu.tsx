@@ -131,7 +131,7 @@ export const Menu = () => {
                 return (
                   <Link
                     key={item.href}
-                    href={"item.href"}
+                    href={item.href}
                     className="flex justify-center items-center lg:justify-start gap-4 py-2 text-gray-500 hover:bg-yellow hover:rounded-md hover:px-2 transition-all duration-300 ease-in-out "
                   >
                     <Image src={item.icon} alt="icon" width={20} height={20} />
