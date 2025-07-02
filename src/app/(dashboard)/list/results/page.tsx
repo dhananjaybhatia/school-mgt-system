@@ -1,9 +1,9 @@
+import FormModal from "@/src/components/FormModal";
 import Pagination from "@/src/components/Pagination";
 import Table from "@/src/components/Table";
 import TableSearch from "@/src/components/TableSearch";
 import { role, resultsData } from "@/src/lib/data";
 import Image from "next/image";
-import Link from "next/link";
 
 type Results = {
   id: number;
@@ -70,15 +70,11 @@ const ExamsListPage = () => {
       <td className="hidden md:table-cell">{item.date}</td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/list/teachers/${item.id}`}>
-            <button className="w-7 h-7 rounded-full flex justify-center items-center bg-blue">
-              <Image src="/edit.png" alt="" width={16} height={16} />
-            </button>
-          </Link>
           {role === "admin" && (
-            <button className="w-7 h-7 rounded-full flex justify-center items-center bg-pink">
-              <Image src="/delete.png" alt="" width={16} height={16} />
-            </button>
+            <>
+              <FormModal table={"result"} type={"update"} data={item} />
+              <FormModal table={"result"} type={"delete"} id={item.id} />
+            </>
           )}
         </div>
       </td>
@@ -98,11 +94,7 @@ const ExamsListPage = () => {
             <button className="flex justify-center items-center gap-4 w-8 h-8 bg-yellow rounded-full">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && (
-              <button className="flex justify-center items-center gap-4 w-8 h-8 bg-yellow rounded-full">
-                <Image src="/plus.png" alt="" width={14} height={14} />
-              </button>
-            )}
+            {role === "admin" && <FormModal table={"result"} type={"create"} />}
           </div>
         </div>
       </div>
