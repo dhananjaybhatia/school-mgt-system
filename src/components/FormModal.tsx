@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
+import TeacherForm from "./forms/TeacherForm";
 
 const FormModal = ({
   table,
@@ -43,7 +44,7 @@ const FormModal = ({
         </button>
       </form>
     ) : (
-      "create or update form"
+      <TeacherForm type={"update"} data={data} />
     );
   };
 
@@ -51,7 +52,7 @@ const FormModal = ({
     <>
       <button
         onClick={() => setOpen(true)}
-        className={`${size} flex justify-center items-center rounded-full ${bgColor}`}
+        className={`${size} flex justify-center items-center cursor-pointer rounded-full ${bgColor}`}
       >
         <Image src={`/${type}.png`} alt="" width={14} height={14} />
       </button>
