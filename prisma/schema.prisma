@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -18,6 +18,7 @@ model Student {
   username    String       @unique
   name        String
   surname     String
+  dateOfBirth DateTime
   email       String?      @unique
   phone       String?      @unique
   address     String
@@ -30,7 +31,7 @@ model Student {
   class       Class        @relation(fields: [classId], references: [id])
   gradeId     Int
   grade       Grade        @relation(fields: [gradeId], references: [id])
-  attendences Attendence[]
+  attendances Attendance[]
   results     Result[]
 }
 
@@ -47,17 +48,20 @@ model Parent {
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]
-  classes   Class[]
+  id          String     @id
+  username    String     @unique
+  name        String
+  surname     String
+  dateOfBirth DateTime
+  image       String?
+  email       String?    @unique
+  phone       String?    @unique
+  address     String
+  createdAt   DateTime   @default(now())
+  subjects    Subject[]
+  lessons     Lesson[]
+  classes     Class[]
+  gender      UserGender
 }
 
 model Subject {
@@ -81,15 +85,15 @@ model Lesson {
   teacherId   String
   exams       Exam[]
   assignments Assignment[]
-  attendences Attendence[]
+  attendances Attendance[]
 }
 
 model Class {
   id            Int            @id @default(autoincrement())
   name          String         @unique
   capacity      Int
-  supervisorId  String
-  supervisor    Teacher        @relation(fields: [supervisorId], references: [id])
+  supervisorId  String?
+  supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   lessons       Lesson[]
   students      Student[]
   gradeId       Int
@@ -136,7 +140,7 @@ model Result {
   studentId    String
 }
 
-model Attendence {
+model Attendance {
   id        Int      @id @default(autoincrement())
   date      DateTime
   present   Boolean
