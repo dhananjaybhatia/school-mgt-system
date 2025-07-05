@@ -2,17 +2,11 @@ import FormModal from "@/src/components/FormModal";
 import Pagination from "@/src/components/Pagination";
 import Table from "@/src/components/Table";
 import TableSearch from "@/src/components/TableSearch";
-import { role, classesData } from "@/src/lib/data";
+import { Class, Teacher } from "@/src/generated/prisma";
+import { role } from "@/src/lib/data";
+import { prisma } from "@/src/lib/prisma";
+import { ITEM_PER_PAGE } from "@/src/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
-
-type Classes = {
-  id: number;
-  name: string;
-  capacity: number;
-  grade: number;
-  supervisor: string;
-};
 
 const columns = [
   {
@@ -40,34 +34,97 @@ const columns = [
   },
 ];
 
-const ClassesListPage = () => {
-  const renderRow = (item: Classes) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-[#f2f1ff]"
-    >
-      <td className="flex items-center gap-4 p-4">
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>
-        </div>
-      </td>
-      <td className="hidden md:table-cell">{item.capacity}</td>
-      <td className="hidden md:table-cell">{item.grade}</td>
-      <td className="hidden md:table-cell">{item.supervisor}</td>
-      <td>
-        <div className="flex items-center gap-2">
-          {role === "admin" && (
-            <>
-              <FormModal table={"class"} type={"update"} data={item} />
+const renderRow = (item: ClassList) => (
+  <tr
+    key={item.id}
+    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-[#f2f1ff]"
+  >
+    <td className="flex items-center gap-4 p-4">
+      <div className="flex flex-col">
+        <h3 className="font-semibold">{item.name}</h3>
+      </div>
+    </td>
+    <td className="hidden md:table-cell">{item.capacity}</td>
+    <td className="hidden md:table-cell">{item.name[0]}</td>
+    <td className="hidden md:table-cell">
+      {item.supervisor?.name + " " + item.supervisor?.surname}
+    </td>
+    <td>
+      <div className="flex items-center gap-2">
+        {role === "admin" && (
+          <>
+            <FormModal table={"class"} type={"update"} data={item} />
 
-              <FormModal table={"class"} type={"delete"} id={item.id} />
-            </>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
+            <FormModal table={"class"} type={"delete"} id={item.id} />
+          </>
+        )}
+      </div>
+    </td>
+  </tr>
+);
 
+type ClassList = Class & { supervisor: Teacher };
+
+const ClassesListPage = async ({
+  searchParams = {},
+}: {
+  searchParams?: { [key: string]: string };
+}) => {
+  const { page, ...queryParams } = searchParams;
+  const p = page ? parseInt(page) : 1;
+
+  // URL PARAMS RULES
+
+  const query: Prisma.ClassWhereInput = {};
+
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "supervisorId":
+            query.supervisorId = value;
+            break;
+          case "search":
+            query.OR = [
+              {
+                name: { contains: value, mode: "insensitive" },
+              },
+              {
+                supervisor: {
+                  is: {
+                    name: { contains: value, mode: "insensitive" },
+                  },
+                },
+              },
+              {
+                supervisor: {
+                  is: {
+                    surname: { contains: value, mode: "insensitive" },
+                  },
+                },
+              },
+            ];
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+  const [data, count] = await prisma.$transaction([
+    prisma.class.findMany({
+      where: query,
+      include: {
+        supervisor: true,
+      },
+      take: ITEM_PER_PAGE,
+      skip: ITEM_PER_PAGE * (p - 1),
+    }),
+
+    prisma.class.count({ where: query }),
+  ]);
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       <div className="flex justify-between items-center">
@@ -87,8 +144,8 @@ const ClassesListPage = () => {
       </div>
 
       <div>
-        <Table columns={columns} renderRow={renderRow} data={classesData} />
-        <Pagination />
+        <Table columns={columns} renderRow={renderRow} data={data} />
+        <Pagination page={p} count={count} />
       </div>
     </div>
   );
