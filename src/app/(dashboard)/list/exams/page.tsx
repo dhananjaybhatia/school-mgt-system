@@ -2,7 +2,7 @@ import FormModal from "@/src/components/FormModal";
 import Pagination from "@/src/components/Pagination";
 import Table from "@/src/components/Table";
 import TableSearch from "@/src/components/TableSearch";
-import { Prisma, Exam, Subject, Teacher } from "@/src/generated/prisma";
+import { Prisma, Exam, Subject, Teacher, Class } from "@/src/generated/prisma";
 import { role } from "@/src/lib/data";
 import { prisma } from "@/src/lib/prisma";
 import { ITEM_PER_PAGE } from "@/src/lib/utils";
@@ -82,7 +82,7 @@ const ExamsListPage = async ({
   // URL PARAMS RULES
 
   query.lesson = {};
-  
+
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {
       if (value !== undefined) {
