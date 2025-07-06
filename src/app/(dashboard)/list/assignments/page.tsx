@@ -2,12 +2,17 @@ import FormModal from "@/src/components/FormModal";
 import Pagination from "@/src/components/Pagination";
 import Table from "@/src/components/Table";
 import TableSearch from "@/src/components/TableSearch";
-import { Assignment, Teacher, Subject, Class } from "@/src/generated/prisma";
+import {
+  Assignment,
+  Teacher,
+  Subject,
+  Class,
+  Prisma,
+} from "@/src/generated/prisma";
 import { role } from "@/src/lib/data";
 import { prisma } from "@/src/lib/prisma";
 import { ITEM_PER_PAGE } from "@/src/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
 
 const columns = [
   {
@@ -104,7 +109,8 @@ const AssignmentsListPage = async ({
                     },
                   },
                 },
-              },{
+              },
+              {
                 lesson: {
                   class: {
                     name: {
@@ -159,7 +165,7 @@ const AssignmentsListPage = async ({
       skip: ITEM_PER_PAGE * (p - 1),
     }),
 
-    prisma.exam.count({ where: query }),
+    prisma.assignment.count({ where: query }),
   ]);
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
