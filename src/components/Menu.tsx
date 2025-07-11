@@ -1,6 +1,7 @@
+import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
 import Link from "next/link";
-import { role } from "../lib/data";
+// import { role } from "../lib/data";
 
 const menuItems = [
   {
@@ -117,7 +118,9 @@ const menuItems = [
   },
 ];
 
-export const Menu = () => {
+export const Menu = async () => {
+  const user = await currentUser();
+  const role = user?.publicMetadata?.role as string;
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((m) => {
