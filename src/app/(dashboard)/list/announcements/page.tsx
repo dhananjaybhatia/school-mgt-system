@@ -3,67 +3,73 @@ import Pagination from "@/src/components/Pagination";
 import Table from "@/src/components/Table";
 import TableSearch from "@/src/components/TableSearch";
 import { Announcement, Class, Prisma } from "@/src/generated/prisma";
-import { role } from "@/src/lib/data";
+import { getUserInfo } from "@/src/lib/getUserRole";
 import { prisma } from "@/src/lib/prisma";
 import { ITEM_PER_PAGE } from "@/src/lib/utils";
 import Image from "next/image";
 
 type AnnouncementList = Announcement & { class: Class };
 
-const columns = [
-  {
-    header: "Title",
-    accessor: "title",
-  },
-  {
-    header: "Class",
-    accessor: "class",
-    className: "",
-  },
-  {
-    header: "Date",
-    accessor: "date",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "actions",
-  },
-];
-
-const renderRow = (item: AnnouncementList) => (
-  <tr
-    key={item.id}
-    className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-[#f2f1ff]"
-  >
-    <td className="flex items-center gap-4 p-4">
-      <div className="flex flex-col">
-        <h3 className="font-semibold">{item.title}</h3>
-      </div>
-    </td>
-    <td className="">{item.class.name}</td>
-    <td className="hidden md:table-cell">
-      {new Intl.DateTimeFormat("en-AU").format(item.date)}
-    </td>
-
-    <td>
-      <div className="flex items-center gap-2">
-        {role === "admin" && (
-          <>
-            <FormModal table={"announcement"} type={"update"} data={item} />
-            <FormModal table={"announcement"} type={"delete"} id={item.id} />
-          </>
-        )}
-      </div>
-    </td>
-  </tr>
-);
-
 const AnnouncementsListPage = async ({
   searchParams = {},
 }: {
   searchParams?: { [key: string]: string };
 }) => {
+  const { role, userId: currentUserId } = await getUserInfo();
+
+  const columns = [
+    {
+      header: "Title",
+      accessor: "title",
+    },
+    {
+      header: "Class",
+      accessor: "class",
+      className: "",
+    },
+    {
+      header: "Date",
+      accessor: "date",
+      className: "hidden md:table-cell",
+    },
+    ...(role === "admin"
+      ? [
+          {
+            header: "Actions",
+            accessor: "actions",
+          },
+        ]
+      : []),
+  ];
+
+  const renderRow = (item: AnnouncementList) => (
+    <tr
+      key={item.id}
+      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-[#f2f1ff]"
+    >
+      <td className="flex items-center gap-4 p-4">
+        <div className="flex flex-col">
+          <h3 className="font-semibold">{item.title}</h3>
+        </div>
+      </td>
+      <td className="">{item.class?.name || "-"}</td>
+      <td className="hidden md:table-cell">
+        {new Intl.DateTimeFormat("en-AU").format(item.date)}
+      </td>
+
+      <td>
+        <div className="flex items-center gap-2">
+          {role === "admin" && (
+            <>
+              <FormModal table={"announcement"} type={"update"} data={item} />
+              <FormModal table={"announcement"} type={"delete"} id={item.id} />
+            </>
+          )}
+        </div>
+      </td>
+    </tr>
+  );
+
   const { page, ...queryParams } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -84,6 +90,21 @@ const AnnouncementsListPage = async ({
       }
     }
   }
+
+  // Role Condition: remember if role is admin it can check anything which comes from {} at the end...
+
+  const roleCondition = {
+    teacher: { lessons: { some: { teacherId: currentUserId! } } },
+    student: { students: { some: { id: currentUserId! } } },
+    parent: { students: { some: { parentId: currentUserId! } } },
+  };
+
+  query.OR = [
+    { classId: null },
+    {
+      class: roleCondition[role as keyof typeof roleCondition] || {}, //==>here
+    },
+  ];
 
   const [data, count] = await prisma.$transaction([
     prisma.announcement.findMany({
@@ -114,7 +135,7 @@ const AnnouncementsListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {role === "admin" && (
-              <FormModal table={"announcement"} type={"create"} />
+              <FormModal table="announcement" type="create" />
             )}
           </div>
         </div>

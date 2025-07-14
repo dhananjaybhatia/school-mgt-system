@@ -14,7 +14,7 @@ const LoginPage = () => {
   useEffect(() => {
     const role = user?.publicMetadata.role;
 
-    if (
+    if (    
       role === "admin" ||
       role === "teacher" ||
       role === "student" ||
